@@ -1,7 +1,8 @@
 ---
 name: kb-merge-vault
-description: Merge a second KB vault into the current one. Copies non-conflicting content, auto-merges conflicting concept articles using LLM synthesis, merges manifests and index, and resets reflect state for a full re-synthesis. Usage: /kb-merge-vault <vault-path>
+description: Merge a second KB vault into the current one. Copies non-conflicting content, auto-merges conflicting concept articles using LLM synthesis (merged articles get editorial_status=draft), merges manifests and index, and resets reflect state for a full re-synthesis. Usage: /kb-merge-vault <vault-path>
 trigger: /kb-merge-vault
+allowed-tools: Read, Write, Edit, Bash
 ---
 
 # KB Merge Vault
@@ -114,9 +115,14 @@ For each `.md` file in `{SOURCE_PATH}/wiki/concepts/`:
 3. If it **does** exist:
    - Read both concept articles
    - Determine `MERGED_LANG`: same `lang` in both → keep it; otherwise → `DEFAULT_LANG`
+   - **Editorial status**: always `draft` in the merged article (body changes substantively). If either source had `editorial_status: published`, log a warning to the merge summary so the user knows a previously-published article was demoted.
    - Write a clean merged article to `{KB_PATH}/wiki/concepts/{SLUG}.md`:
      - **lang**: `MERGED_LANG`
+     - **type**: `concept`
+     - **editorial_status**: `draft`
      - **Tags**: union of both tag lists, deduplicated
+     - **created_at**: earliest of the two articles' `created_at` values
+     - **updated_at**: current UTC ISO 8601
      - **Body**: synthesize both bodies into one coherent article in `MERGED_LANG` — no seams, no duplication, resolve any contradictions explicitly. If one article is in a different language, translate it into `MERGED_LANG` while merging.
      - **Connected Concepts**: union of both lists, deduplicated
      - **Sources**: union of both `## Sources` sections, deduplicated

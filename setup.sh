@@ -85,6 +85,12 @@ for skill_file in "$SCRIPT_DIR"/skills/kb-*.md; do
 done
 echo "Installed skills to $SKILLS_DIR"
 
+# Install shared SCHEMA.md (referenced by skills at runtime)
+if [ -f "$SCRIPT_DIR/skills/SCHEMA.md" ]; then
+  cp "$SCRIPT_DIR/skills/SCHEMA.md" "$SKILLS_DIR/SCHEMA.md"
+  echo "Installed SCHEMA.md to $SKILLS_DIR/SCHEMA.md"
+fi
+
 # Install search tool into KB directory
 cp "$SCRIPT_DIR/kb_search.py" "$KB_PATH/kb_search.py"
 chmod +x "$KB_PATH/kb_search.py"
@@ -92,7 +98,12 @@ echo "Installed kb_search.py to $KB_PATH"
 
 echo ""
 echo "Done! Open $KB_PATH in Obsidian."
-echo "Skills available: /kb-ingest, /kb-import, /kb-compile, /kb-ask, /kb-lint, /kb-output, /kb-reflect, /kb-merge, /kb-merge-vault"
-echo "Search tool: python3 $KB_PATH/kb_search.py \"query\""
+echo "Skills available:"
+echo "  Ingest:    /kb-ingest, /kb-source (medical: DOI/PMID auto-fetch), /kb-import"
+echo "  Compile:   /kb-compile, /kb-merge, /kb-merge-vault"
+echo "  Query:     /kb-ask, /kb-output (slides/chart)"
+echo "  Maintain:  /kb-lint, /kb-reflect, /kb-review (fact-check workflow), /kb-translate"
+echo "Schema:    $SKILLS_DIR/SCHEMA.md"
+echo "Search:    python3 $KB_PATH/kb_search.py \"query\""
 echo ""
 echo "To install Python dependencies: pip install -r requirements.txt"

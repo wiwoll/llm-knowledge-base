@@ -1,7 +1,8 @@
 ---
 name: kb-reflect
-description: Scan the wiki for cross-cutting connections, implicit relationships, contradictions, and gaps. Writes new synthesis articles and a reflection report. Triggered automatically after /kb-compile, or run manually.
+description: Scan the wiki for cross-cutting connections, implicit relationships, contradictions (especially medical evidence-level conflicts), and gaps. Writes new synthesis articles (always editorial_status=draft) and a reflection report. Triggered automatically after /kb-compile, or run manually.
 trigger: /kb-reflect
+allowed-tools: Read, Write, Edit, Bash
 ---
 
 # KB Reflect
@@ -64,6 +65,7 @@ Using only the one-line summaries in `## Concepts` and `## Sources`, identify th
 | `cross-cutting` | A theme or idea that appears across multiple unrelated sources/concepts |
 | `relationship` | Two concepts that seem deeply related but have no `[[link]]` between them |
 | `contradiction` | Two sources or concepts that appear to take opposing positions on the same topic |
+| `evidence-conflict` | Two medical sources reach different conclusions on the same intervention/outcome — flag the higher-evidence-level source. Specifically valuable: meta-analysis vs. single RCT vs. observational vs. case report disagreements |
 | `gap` | A theme strongly implied by multiple entries but with no dedicated concept article |
 
 **Priority rule:** Candidates that involve at least one article from `RECENT_ARTICLES` are ranked higher.
@@ -115,10 +117,12 @@ For candidates with strong evidence, write to `{KB_PATH}/wiki/concepts/{proposed
 ```markdown
 ---
 lang: {DEFAULT_LANG}
-tags: [{tags from connected concepts, plus "synthesis"}]
 type: synthesis
+editorial_status: draft
+tags: [{tags from connected concepts, plus "synthesis"}]
 created_by: kb-reflect
 created_at: {current UTC ISO timestamp}
+updated_at: {current UTC ISO timestamp}
 ---
 
 # {proposed_title in {DEFAULT_LANG}}

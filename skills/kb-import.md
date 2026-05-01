@@ -1,7 +1,8 @@
 ---
 name: kb-import
-description: Import an existing Obsidian vault into the knowledge base. Inspects each note and routes it intelligently — structured concept articles go to wiki/concepts/, raw research notes go to raw/notes/ for later compilation. Usage: /kb-import <vault-path>
+description: Import an existing Obsidian vault into the knowledge base. Inspects each note and routes it intelligently — structured concept articles go to wiki/concepts/ (always editorial_status=draft, must be reviewed via /kb-review before relying on the content), raw research notes go to raw/notes/ for later compilation. Usage: /kb-import <vault-path>
 trigger: /kb-import
+allowed-tools: Read, Write, Edit, Bash
 ---
 
 # KB Import
@@ -101,11 +102,15 @@ When in doubt between the two, route to `raw/notes/` — it will be compiled lat
      ```yaml
      ---
      lang: {NOTE_LANG}
+     type: concept
+     editorial_status: draft
      tags: [{infer 2-4 relevant tags from content}]
      imported_from: {original filename}
+     created_at: {current UTC ISO 8601}
+     updated_at: {current UTC ISO 8601}
      ---
      ```
-   - If frontmatter exists, add `lang: {NOTE_LANG}` (if missing) and `imported_from: {original filename}` to it
+   - If frontmatter exists, ensure `lang`, `type: concept`, `editorial_status: draft`, `imported_from`, `created_at`, `updated_at` are present (add missing ones, preserve any existing values for `lang`, `created_at`). **Always set `editorial_status: draft`** for imported articles regardless of any prior status — the new vault must verify content independently.
 4. Append to `wiki/index.md` under `## Konzepte / Concepts` (or `## Concepts` for older index format), only if not already present:
    ```
    - [[concepts/{SLUG}]] — {one-line description in {DEFAULT_LANG} inferred from content; if NOTE_LANG ≠ DEFAULT_LANG, append "({NOTE_LANG})"}

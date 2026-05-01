@@ -141,7 +141,64 @@ bash setup.sh ~/knowledge-base
 
 ---
 
+## Editorial Schema (Medical Wiki)
+
+This fork ships a canonical frontmatter schema for medical editorial work. See **[skills/SCHEMA.md](skills/SCHEMA.md)** for the full specification — it covers:
+
+- **Core fields** on every artefact: `lang`, `tags`, `created_at`, `updated_at`
+- **Medical metadata** for sources: `doi`, `pmid`, `pmcid`, `journal`, `study_type`, `evidence_level` (Oxford CEBM), `peer_reviewed`, `authors`, `population`, `sample_size`
+- **Editorial workflow** for concept articles: `editorial_status: draft|in-review|fact-checked|published` plus `reviewed_by` / `reviewed_at`
+- **Translation linkage**: `translation_of` and `translations` for keeping language editions in sync
+
+LLM-generated content is **always** written with `editorial_status: draft`. Promotion through the workflow is the job of `/kb-review` (human-in-the-loop, never automated).
+
+---
+
 ## Skills
+
+### `/kb-source <DOI|PMID|PMCID|URL>`
+
+Ingest a medical source with full bibliographic metadata. Auto-resolves identifiers via the PubMed MCP server when available; falls back to CrossRef / NCBI E-utilities otherwise.
+
+```
+/kb-source 10.1056/nejmoa2032183
+/kb-source 33567185
+/kb-source PMC7745181
+/kb-source https://pubmed.ncbi.nlm.nih.gov/33567185/
+```
+
+Populates: DOI, PMID, PMCID, journal, authors, publication date, study type (RCT, meta-analysis, etc.), Oxford CEBM evidence level, peer-reviewed flag, abstract, and (when available) full text.
+
+For non-medical web articles, plain notes, or images, use `/kb-ingest` instead.
+
+---
+
+### `/kb-review <article-slug> [flags]`
+
+Move a concept article through the editorial workflow.
+
+```
+/kb-review glp-1-agonisten --status in-review
+/kb-review glp-1-agonisten --status fact-checked --reviewer @editor1 --notes "Numbers verified against NEJM source."
+/kb-review glp-1-agonisten --status published --reviewer @editor1
+```
+
+Status transitions: `draft` → `in-review` → `fact-checked` → `published`. Published articles are locked from further LLM modification (any `/kb-compile` that would touch them is skipped and reported). Re-publication requires creating a new draft revision.
+
+---
+
+### `/kb-translate <article-slug> <target-lang>`
+
+Create or refresh a translation of a concept article into a supported language. Maintains bidirectional `translation_of` / `translations` links and records the source-article commit hash so `/kb-lint` can flag stale translations.
+
+```
+/kb-translate glp-1-agonisten en
+/kb-translate adipositas-leitlinie-2025 fr
+```
+
+Translations always start as `editorial_status: draft` regardless of the canonical's status — every language edition needs its own review.
+
+---
 
 ### `/kb-import <vault-path>`
 

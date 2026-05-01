@@ -1,7 +1,8 @@
 ---
 name: kb-merge
-description: Merge duplicate or related concept articles. Accepts an explicit pair (/kb-merge slug-a slug-b) or runs auto-detection from wiki duplicates. Synthesizes a clean merged article, updates all backlinks, and archives the absorbed article.
+description: Merge duplicate or related concept articles. Accepts an explicit pair (/kb-merge slug-a slug-b) or runs auto-detection from wiki duplicates. Synthesizes a clean merged article (always editorial_status=draft because the body changes substantively), updates all backlinks, and archives the absorbed article.
 trigger: /kb-merge
+allowed-tools: Read, Write, Edit, Bash
 ---
 
 # KB Merge
@@ -80,10 +81,16 @@ Write a clean merged article to `{KB_PATH}/wiki/concepts/{slug-keep}.md`:
 
 Determine `MERGED_LANG`: if both articles have the same `lang`, use it; otherwise use `DEFAULT_LANG`.
 
+**Editorial status of the merged article: always `draft`.** The body changes substantively in a merge, and any prior fact-check status no longer applies. Both articles must be re-reviewed via `/kb-review` after the merge. If either input article was `published`, refuse the merge and prompt the user to either revoke publication first or pick a different absorb-target.
+
 ```markdown
 ---
 lang: {MERGED_LANG}
+type: concept
+editorial_status: draft
 tags: [{union of both articles' tags, deduplicated}]
+created_at: {min of both articles' created_at, or earliest available}
+updated_at: {current UTC ISO 8601}
 ---
 
 # {Title in {MERGED_LANG}: use slug-keep's title, or synthesize a better one if the merge warrants it}

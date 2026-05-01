@@ -1,7 +1,8 @@
 ---
 name: kb-ingest
-description: Ingest a URL, PDF, image path, or plain text note into your personal knowledge base raw/ directory. Registers the content in the manifest for later compilation. Usage: /kb-ingest <url|path|note text>
+description: Ingest a URL, PDF, image path, or plain text note into your personal knowledge base raw/ directory. Registers the content in the manifest for later compilation. For medical sources identified by DOI or PubMed ID, prefer /kb-source instead — it auto-resolves bibliographic metadata. Usage: /kb-ingest <url|path|note text>
 trigger: /kb-ingest
+allowed-tools: Read, Write, Edit, Bash, WebFetch
 ---
 
 # KB Ingest
@@ -43,9 +44,22 @@ The argument passed after `/kb-ingest` is the source. Classify it:
 | Ends with `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg` (case-insensitive) | `image` |
 | Anything else | `note` |
 
+**Medical-source delegation:** If the source matches any of these patterns, suggest delegating to `/kb-source` (which auto-resolves bibliographic metadata via PubMed):
+
+- DOI: matches `^10\.\d+/.+`
+- PMID: matches `^\d{6,9}$`
+- URL containing `pubmed.ncbi.nlm.nih.gov`, `ncbi.nlm.nih.gov/pmc`, or `doi.org/10.`
+
+In those cases, print:
+```
+This looks like a medical source identifier. /kb-source <id> will auto-fetch DOI/PMID/journal/study-type metadata.
+Continue with /kb-ingest anyway? [y/n]
+```
+If the user says no, stop and let them re-invoke `/kb-source`. Otherwise proceed with the basic web flow below.
+
 ### 4. Ingest by Type
 
-Record the current UTC time in ISO 8601 format (e.g. `2026-04-05T10:00:00Z`) as `INGESTED_AT`.
+Record the current UTC time in ISO 8601 format (e.g. `2026-04-05T10:00:00Z`) as `INGESTED_AT`. Set `CREATED_AT = INGESTED_AT` and `UPDATED_AT = INGESTED_AT` for the schema's core timestamp fields.
 
 **Language detection:** After fetching/reading the content (sub-steps below), detect the source language. Set `LANG` to the ISO 639-1 code that matches one of `SUPPORTED_LANGS` (e.g. `de`, `en`). If detection is ambiguous or the language is not in `SUPPORTED_LANGS`, fall back to `DEFAULT_LANG`. For plain notes without enough text to detect, use `DEFAULT_LANG`.
 
@@ -66,9 +80,12 @@ Record the current UTC time in ISO 8601 format (e.g. `2026-04-05T10:00:00Z`) as 
 ---
 source: {full URL}
 ingested_at: {INGESTED_AT}
+created_at: {CREATED_AT}
+updated_at: {UPDATED_AT}
 type: web
 lang: {LANG}
 status: uncompiled
+tags: [{3–6 lowercase tags inferred from content}]
 ---
 
 {cleaned markdown content}
@@ -89,9 +106,12 @@ Set `RAW_KEY` = `raw/web/{slug}.md`
 ---
 source: {original file path}
 ingested_at: {INGESTED_AT}
+created_at: {CREATED_AT}
+updated_at: {UPDATED_AT}
 type: pdf
 lang: {LANG}
 status: uncompiled
+tags: [{3–6 lowercase tags inferred from content}]
 ---
 
 {extracted text}
@@ -118,10 +138,13 @@ Set `RAW_KEY` = `raw/pdfs/{slug}.md`
 ---
 source: {original file path}
 ingested_at: {INGESTED_AT}
+created_at: {CREATED_AT}
+updated_at: {UPDATED_AT}
 type: image
 lang: {LANG}
 status: uncompiled
 image_file: {slug}.{ext}
+tags: [{3–6 lowercase tags inferred from image content}]
 ---
 
 {detailed description in {LANG}}
@@ -150,9 +173,12 @@ Set `RAW_KEY` = `raw/images/{slug}.md`
 ---
 source: manual
 ingested_at: {INGESTED_AT}
+created_at: {CREATED_AT}
+updated_at: {UPDATED_AT}
 type: note
 lang: {LANG}
 status: uncompiled
+tags: [{3–6 lowercase tags inferred from content; if too short to tag, use ["note"]}]
 ---
 
 {content}

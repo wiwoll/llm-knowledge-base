@@ -1,7 +1,8 @@
 ---
 name: kb-output
-description: Render knowledge base content as a Marp slideshow or matplotlib chart. Accepts a question (researches the wiki) or an existing outputs/ file path. Usage: /kb-output --slides <question|file> or /kb-output --chart <question|file>
+description: Render knowledge base content as a Marp slideshow or matplotlib chart. Accepts a question (researches the wiki) or an existing outputs/ file path. For medical content, slides include full bibliographic citations (DOI/PMID) on a final references slide. Usage: /kb-output --slides <question|file> or /kb-output --chart <question|file>
 trigger: /kb-output
+allowed-tools: Read, Write, Edit, Bash
 ---
 
 # KB Output
@@ -87,7 +88,9 @@ Rules:
 - Max 5 bullet points per slide
 - Code blocks get their own dedicated slide
 - Last slide always cites wiki sources used
+- For any source that has medical metadata (`doi`, `pmid`, `journal`, `publication_date`, `evidence_level`), the last "Quellen / References" slide must use full bibliographic format: `{authors}. {title}. {journal}. {year}. doi:{DOI}. PMID: {PMID}. (Evidenzlevel {evidence_level})`
 - No walls of text — if a point needs more than one line, split it into sub-bullets
+- If any consulted concept article has `editorial_status: draft`, prepend a yellow warning banner on the title slide: "⚠ Enthält ungeprüfte Inhalte (Status: draft) — vor Veröffentlichung mit /kb-review absichern"
 
 Write to `{KB_PATH}/outputs/{OUTPUT_DATE}-{slug}-slides.md`:
 

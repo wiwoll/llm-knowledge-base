@@ -1,7 +1,8 @@
 ---
 name: kb-lint
-description: Run health checks on your knowledge base wiki. Finds thin articles, missing concepts, broken wikilinks, duplicate concepts, and suggests new article candidates. Prints a terminal summary and saves a full report to outputs/.
+description: Run health checks on the wiki. Finds thin articles, missing concepts, broken wikilinks, duplicate concepts, schema violations (missing lang/editorial_status/medical metadata for medical sources), stale translations (canonical revision changed), and suggests new article candidates. Prints a terminal summary and saves a full report to outputs/.
 trigger: /kb-lint
+allowed-tools: Read, Write, Edit, Bash, WebSearch
 ---
 
 # KB Lint
@@ -40,6 +41,11 @@ broken_links: []
 duplicate_concepts: []
 new_suggestions: []
 lang_inconsistencies: []
+schema_violations: []        # missing required fields per SCHEMA.md
+medical_metadata_gaps: []    # medical sources missing doi/pmid/study_type/evidence_level
+editorial_status_gaps: []    # concept articles missing editorial_status
+stale_translations: []       # translation_of references with mismatched canonical_revision
+unverified_publications: []  # editorial_status=published but missing reviewed_by/reviewed_at
 ```
 
 ---
@@ -107,6 +113,35 @@ For each candidate pair, add to `duplicate_concepts`:
 ```
 { "slug_a": "attention", "slug_b": "attention-mechanism", "reason": "substring match" }
 ```
+
+---
+
+### 6.5. Check D2 — Schema Compliance
+
+For each `.md` file in `wiki/concepts/`, `wiki/sources/`, `outputs/`:
+
+1. Read the YAML frontmatter
+2. Check the schema rules from SCHEMA.md:
+   - **All artefacts**: must have `lang`, `tags`, `created_at`, `updated_at`
+   - **Concept articles**: must additionally have `type` ∈ {`concept`, `synthesis`} and `editorial_status` ∈ {`draft`, `in-review`, `fact-checked`, `published`}
+   - **`fact-checked` or `published` concepts**: must have `reviewed_by` and `reviewed_at`
+   - **Source articles**: must have `source`, `type`, `ingested_at`. If the source URL contains `pubmed`, `doi.org`, `nejm`, `thelancet`, `bmj`, `jamanetwork`, or other recognizably medical domains, flag missing `doi`/`pmid`/`study_type`/`evidence_level` as `medical_metadata_gaps`.
+3. For each violation, add to the appropriate list (`schema_violations` for missing core fields, `editorial_status_gaps` for concept-specific issues, `unverified_publications` for fact-check issues, `medical_metadata_gaps` for medical metadata).
+
+### 6.6. Check D3 — Translation Staleness
+
+For each concept article with `translation_of: {canonical-slug}`:
+
+1. Read the article's `canonical_revision` value
+2. Get the canonical's current commit hash for its file:
+   ```bash
+   cd {KB_PATH} && git log -1 --format=%h -- wiki/concepts/{canonical-slug}.md
+   ```
+3. If the hashes differ, add to `stale_translations`:
+   ```
+   { "translation": "concepts/{slug}.md", "canonical": "concepts/{canonical-slug}.md",
+     "recorded_revision": "{canonical_revision}", "current_revision": "{current_hash}" }
+   ```
 
 ---
 
@@ -178,6 +213,26 @@ generated_at: {current UTC ISO timestamp}
 ## Language Inconsistencies
 {If none: localized "None found."}
 {For each: "- {file} — lang: {actual} (expected {DEFAULT_LANG} for concept) / missing lang field"}
+
+## Schema Violations
+{If none: localized "None found."}
+{For each violation: "- {file} — missing required field(s): {list}"}
+
+## Editorial Status Gaps
+{If none: localized "None found."}
+{For each: "- {file} — {reason: missing editorial_status / fact-checked but missing reviewer / etc.}"}
+
+## Medical Metadata Gaps
+{If none: localized "None found."}
+{For each: "- {file} (medical source) — missing: {list of missing medical fields}. Suggest: re-ingest via /kb-source <DOI|PMID>."}
+
+## Stale Translations
+{If none: localized "None found."}
+{For each: "- {translation} is based on canonical revision {recorded} but canonical is now at {current}. Re-run /kb-translate {canonical} {lang}."}
+
+## Unverified Publications
+{If none: localized "None found."}
+{For each: "- {file} marked as published but missing reviewed_by/reviewed_at. Run /kb-review {slug} --status published --reviewer @username."}
 
 ## New Article Suggestions
 {If none: localized "No suggestions."}
