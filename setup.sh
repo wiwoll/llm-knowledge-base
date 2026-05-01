@@ -91,6 +91,15 @@ if [ -f "$SCRIPT_DIR/skills/SCHEMA.md" ]; then
   echo "Installed SCHEMA.md to $SKILLS_DIR/SCHEMA.md"
 fi
 
+# Install magazine specifications (referenced by /kb-issue-plan, /kb-cme-draft, etc.)
+if [ -d "$SCRIPT_DIR/skills/magazines" ]; then
+  mkdir -p "$SKILLS_DIR/magazines"
+  for spec_file in "$SCRIPT_DIR"/skills/magazines/*.md; do
+    [ -f "$spec_file" ] && cp "$spec_file" "$SKILLS_DIR/magazines/$(basename "$spec_file")"
+  done
+  echo "Installed magazine specs to $SKILLS_DIR/magazines/"
+fi
+
 # Install search tool into KB directory
 cp "$SCRIPT_DIR/kb_search.py" "$KB_PATH/kb_search.py"
 chmod +x "$KB_PATH/kb_search.py"
@@ -99,11 +108,16 @@ echo "Installed kb_search.py to $KB_PATH"
 echo ""
 echo "Done! Open $KB_PATH in Obsidian."
 echo "Skills available:"
-echo "  Ingest:    /kb-ingest, /kb-source (medical: DOI/PMID auto-fetch), /kb-import"
-echo "  Compile:   /kb-compile, /kb-merge, /kb-merge-vault"
-echo "  Query:     /kb-ask, /kb-output (slides/chart)"
-echo "  Maintain:  /kb-lint, /kb-reflect, /kb-review (fact-check workflow), /kb-translate"
-echo "Schema:    $SKILLS_DIR/SCHEMA.md"
-echo "Search:    python3 $KB_PATH/kb_search.py \"query\""
+echo "  Ingest:        /kb-ingest, /kb-source (medical: DOI/PMID auto-fetch), /kb-import"
+echo "  Compile:       /kb-compile, /kb-merge, /kb-merge-vault"
+echo "  Query:         /kb-ask, /kb-output (slides/chart)"
+echo "  Maintain:      /kb-lint, /kb-reflect, /kb-review (fact-check workflow), /kb-translate"
+echo "  Magazines:"
+echo "    Plan:        /kb-issue-plan"
+echo "    Draft:       /kb-cme-draft, /kb-mc-questions, /kb-news-item, /kb-medizin-article, /kb-sonderreport, /kb-editorial"
+echo "    Compose:     /kb-style-lint, /kb-issue-compose"
+echo "Schema:          $SKILLS_DIR/SCHEMA.md"
+echo "Magazine specs:  $SKILLS_DIR/magazines/"
+echo "Search:          python3 $KB_PATH/kb_search.py \"query\""
 echo ""
 echo "To install Python dependencies: pip install -r requirements.txt"

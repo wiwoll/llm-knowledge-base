@@ -141,6 +141,39 @@ bash setup.sh ~/knowledge-base
 
 ---
 
+## Magazine Production (Phase 3)
+
+This fork supports **producing complete magazine issues** for Prime Public Media AG's specialty titles, starting with **InFo Neurologie & Psychiatrie**. The system reverse-engineers a magazine's house style from past issues and then generates issue plans, articles (CME, Medizin, News, Sonderreport, Editorial), MC question pages, and composed full issues with proper page-budget arithmetic.
+
+### Magazine specifications
+
+Each magazine has a canonical specification under `skills/magazines/`:
+
+| Slug | Magazine | Spec |
+|---|---|---|
+| `info-np` | InFo Neurologie & Psychiatrie | [`MAGAZINE-INFO-NP.md`](skills/magazines/MAGAZINE-INFO-NP.md) |
+| _other 14 specialty titles_ | _pending reverse-engineering_ | — |
+
+The full audit trail (4 parallel agent reports) for each magazine lives under `docs/reverse-engineering/<slug>/`.
+
+### Production skills
+
+| Skill | Purpose |
+|---|---|
+| `/kb-issue-plan <slug> <issue-id>` | Generate the Themenplan for an issue: section budget, topic candidates, sponsor slots, candidate authors |
+| `/kb-cme-draft <slug> <issue-id> <topic>` | Draft a CME-Fortbildung article with mandatory Take-Home-Messages, sponsor disclosure, Vancouver references |
+| `/kb-mc-questions <slug> <issue-id> <topic>` | Generate 6–8 MC questions with single-best/multi-select mix, vignettes, and answer keys for medizinonline.com |
+| `/kb-news-item <slug> <issue-id> --kind wissenschaft\|markt-medizin` | Draft a single news item from a press release |
+| `/kb-medizin-article <slug> <issue-id> <topic> --kind study\|congress\|review` | Draft a Medizin-section article |
+| `/kb-sonderreport <slug> <issue-id> <slug> --kind sonderreport\|publireportage` | Draft sponsored content with mandatory disclosures, Kurzfachinformation, off-label refusal |
+| `/kb-editorial <slug> <issue-id> --voice burggraf\|schliebe\|blanke` | Draft the issue Editorial in a chosen voice profile |
+| `/kb-style-lint <issue-id>` | Audit articles against the magazine's house style (Swiss numbers, drug-name discipline, voice match, schema compliance) |
+| `/kb-issue-compose <slug> <issue-id>` | Assemble drafted articles into a complete issue (TOC, page numbers, cross-refs, page-budget divisible by 4) |
+
+All article output is `editorial_status: draft` by design. Promotion through the workflow is human-in-the-loop via `/kb-review`.
+
+---
+
 ## Editorial Schema (Medical Wiki)
 
 This fork ships a canonical frontmatter schema for medical editorial work. See **[skills/SCHEMA.md](skills/SCHEMA.md)** for the full specification — it covers:
