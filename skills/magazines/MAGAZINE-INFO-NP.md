@@ -19,8 +19,10 @@ Canonical production specification for **InFo Neurologie & Psychiatrie**, revers
 | Issue identifier | `NP{N}-{YY}` (e.g., `NP3-26` = issue 3 of 2026) |
 | Specialties | Neurology + Psychiatry (single dual-specialty title) |
 | Audience country tilt | Switzerland primary; DACH secondary |
-| Editorial language | German (Swiss orthography). Rare French CME pieces for francophone CH (e.g., NP6-24 p.21). |
-| CME accreditation pipeline | medizinonline.com (Prime Public Media's own platform). The accrediting Fachgesellschaft is not printed on paper. |
+| Editorial language | German (Swiss orthography). **French CME content is permanently planned** for francophone CH; previously constrained by editor staffing. Sample: NP6-24 p.21 (Maladie d'Alzheimer). With LLM-assisted production, French becomes feasible per issue on demand. |
+| CME accreditation pipeline | medizinonline.com (Prime Public Media's own platform). PPM may **self-accredit** in many cases (default mode); on customer request, PPM beantragt CME-Punkte at the relevant Fachgesellschaft (CHF 2'250.– Aufpreis per Mediadaten 2026). The accrediting body is **not printed on paper** — varies per CME slot, surfaced only in the user's medizinonline.com cockpit. |
+| Med. Herausgeber | Prof. Dr. med. Barbara Tettenborn, St. Gallen (Neurologie); Prof. Dr. med. Erich Seifritz, Zürich (Psychiatrie) |
+| Buchung / Disposition | werbung@primemedic.ch, Tel. 044 250 28 70 |
 
 ---
 
@@ -43,9 +45,9 @@ Standard 44-page issue, divisible by 4 (prints observed: 40, 44, 48, 52, 56). Mo
 | 11 | Das Letzte | back (intro NP5-24) | ½–1 p | 0–1 | new from 2024 |
 | 12 | U3 / U4 ads | last 1–3 p | 2–3 p | ads | ✓ |
 
-**Cover anomaly NP1-26:** page 1 is a full-page Kesimpta ad, the actual teaser cover frame moves to p.3. Treat this as a configurable `cover_mode: "teaser"` (default) vs. `"sponsored-takeover"` flag in the issue plan.
+**Cover anomaly NP1-26 (Kesimpta full-page):** This is a paid **Sonderwerbeform "Titelseite"** per Mediadaten 2026 (Prod. ID 020, CHF 10'495.–). **Einzelfall** — only when a customer purchases this specific format. Default cover stays the teaser layout. Skill flag: `cover_mode: "teaser"` (default) vs. `"sponsored-takeover"` (only on confirmed booking).
 
-**CME volume reduction from NP5-25:** issues now ship with 1 CME article instead of 2. Skill defaults: 1 CME, but accept `--cme-count 2` flag.
+**CME volume:** Default is **2 CME articles per issue** (the canonical InFo NP format throughout 2023–early 2025). The 1-CME issues NP5-25 and NP1-26 were a **temporary Engpass-Notlösung** caused by editor recruiting gaps. **With this LLM-driven production system, the 2-CME format is restored as the default.** Skill flag: `--cme-count 2` (default) vs. `--cme-count 1` (legacy / explicit single-topic special).
 
 ---
 
@@ -90,9 +92,11 @@ URL change: medizinonline.ch → medizinonline.com from NP3-23 onward. Use `.com
 
 | Profile | Active period | Tone | Headline pattern | Closer |
 |---|---|---|---|---|
-| `burggraf` | NP1-23 → NP1-25 | Warm / colloquial / metaphor-driven (e.g., "Tau-frisch im Alter!?", "Ein Indianerherz kennt keinen Schmerz – oder doch?") | Word-play, cultural reference, often question | "Viel Spass / viel Freude" |
-| `schliebe` | NP2-25 → NP4-25 | Sober / academic / evidence-anchored ("Damit gilt als plausibel, dass …") | Descriptive | "Ich wünsche Ihnen eine erkenntnisreiche Lektüre …" |
-| `blanke` | NP5-25 → NP1-26 | Wry / colloquial / occasionally satirical (e.g., "biokular schauen", "Lernen wir schielen") | Imperative / programmatic ("Zeit zum Schielen: Mensch vs. Algorithmus") | "Ich wünsche Ihnen eine erkenntnisreiche Lektüre …" |
+| `burggraf` | NP1-23 → NP1-25 (retired) | Warm / colloquial / metaphor-driven (e.g., "Tau-frisch im Alter!?", "Ein Indianerherz kennt keinen Schmerz – oder doch?") | Word-play, cultural reference, often question | "Viel Spass / viel Freude" |
+| `schliebe` | **active, permanent staff** (since NP2-25) | Sober / academic / evidence-anchored ("Damit gilt als plausibel, dass …") | Descriptive | "Ich wünsche Ihnen eine erkenntnisreiche Lektüre …" |
+| `blanke` | **active, permanent staff** (since NP5-25) | Wry / colloquial / occasionally satirical (e.g., "biokular schauen", "Lernen wir schielen") | Imperative / programmatic ("Zeit zum Schielen: Mensch vs. Algorithmus") | "Ich wünsche Ihnen eine erkenntnisreiche Lektüre …" |
+
+Schliebe and Blanke are both permanent fixtures of the editorial team. They alternate (or share by issue) and both voices are available to `/kb-editorial`. Burggraf is retired; the profile remains documented for archival accuracy and may be reactivated if a future editor matches that voice.
 
 ---
 
@@ -473,10 +477,8 @@ Class in apposition mandatory: "Lixisenatid. Es gehört zur Substanzklasse der G
 
 ### 14.10 Patient nomenclature
 - 2023: `Patienten` (generic masculine)
-- 2024+: gender-aware variants present, **inconsistent** within issues:
-  - `Patient*innen`, `Patient:innen`, `Patientinnen und Patienten`
-  - **Pending house-style decision** — until then, default to `Patientinnen und Patienten` (longest, most formal, present in latest issue NP6-25)
-- For `Personen mit <condition>` style (people-first language), allow when the source uses it
+- **House style (decision logged 2026-05-01)**: use **`Patientinnen und Patienten`** consistently. The `Patient*innen` and `Patient:innen` variants seen in past issues are **not** house style — those should be replaced when an article is touched.
+- For `Personen mit <condition>` style (people-first language), allow when clinically meaningful and consistent with the source.
 
 ### 14.11 Recurring rhetorical templates (verbatim)
 
@@ -555,28 +557,133 @@ Concrete tells that mark a piece as fitting the publication:
 
 ---
 
-## 19. Open issues (require human editor decision)
+## 19. Resolution log (editor decisions on open issues)
 
-These cannot be resolved from the PDFs alone — they should be settled before full automation:
+Decisions made 2026-05-01 by Chefredaktion:
 
-1. **Patient*innen vs. Patient:innen vs. Patientinnen und Patienten** — inconsistent across same year. House style needs decision.
-2. **CME accreditation pipeline** — which Schweizer Fachgesellschaft awards the credits via medizinonline.com? (Not printed.) Needed for compliance metadata even if not on paper.
-3. **CME 2 → 1 reduction** — is single-CME the new normal or a content-shortfall stopgap? Default skill behaviour: 1 CME, accept `--cme-count 2` flag for fall-back to old format.
-4. **Cover mode NP1-26** — sponsored takeover (Kesimpta) a one-off rate-card change or a permanent option? Skill flag: `cover_mode: teaser|sponsored-takeover`.
-5. **Sonderreport vs. Publireportage rate-card** — distinction in price/length not visible in PDFs. Mediadaten doc would resolve.
-6. **Editorial voice profile per issue** — currently inferred from sign-off; should be explicit in `/kb-issue-plan` (`editorial_voice: burggraf|schliebe|blanke|<new>`).
-7. **KOL COI** — currently not printed. Industry trend toward disclosure could mandate this in future. Capture in frontmatter (`kol.coi:`) for archive even if not rendered.
-8. **PMID in references** — currently never printed. We store PMIDs in our wiki sources but suppress in print output. Confirm.
-9. **KONGRESS banner mandatory** for all conference-derived content vs. only major (DGN/EAN/ECTRIMS)? Currently inconsistent.
-10. **Reader-engagement instrumentation** — no Letters to the editor, no Top-Read. Should the digital edition (medizinonline.com) feed this back? If so, surface to `/kb-issue-plan` as topic-priority signal.
-11. **Bilingual policy** — French CME (NP6-24 only). Permanent option for francophone CH?
-12. **Auf einen Blick** rubric — last seen NP1-25 p.33. Retired or paused?
-13. **Other 14 specialty titles** — production specs to be reverse-engineered analogously. Suggested order: highest-volume titles first (Onkologie? Kardiologie? Pädiatrie?).
+1. **Patient nomenclature** → `Patientinnen und Patienten` is house style. Other variants are not.
+2. **CME accreditation** → PPM may self-accredit (default). On customer request, PPM beantragt CME-Punkte at the relevant Fachgesellschaft (CHF 2'250.– surcharge per Mediadaten 2026 §31). Not printed on paper.
+3. **CME 2 → 1** → was Engpass-Notlösung. With LLM-driven production: **2 CMEs per issue is restored as default**.
+4. **Cover takeover (NP1-26)** → Einzelfall, only on explicit customer purchase of Sonderwerbeform "Titelseite" (CHF 10'495.– per Mediadaten 2026 §21).
+5. **Mediadaten 2026** → integrated. See [`MEDIADATEN-2026.md`](MEDIADATEN-2026.md).
+6. **Editorial voice** → Schliebe and Blanke are permanent staff. Burggraf retired. Profile per issue is explicit in `/kb-issue-plan`.
+7. **Bilingual French** → permanent target (was staffing-constrained). LLM-assisted production removes the constraint; French CME becomes available on customer / editorial request.
+8. **NP3-26 → NP4-26 planning method** → documented in §21 below.
+9. **Other specialty titles** → produce InFo Neurologie & Psychiatrie first; expand to other 14 titles after the production loop is proven on InFo NP.
+
+Open items (newly identified or carried forward):
+
+- **KOL COI in print** — currently absent. Industry trend toward disclosure could require this. Capture in frontmatter for archive; print-rendering rule TBD.
+- **PMID in print references** — confirmed: stored in frontmatter, suppressed in print (Vancouver-with-DOI only).
+- **KONGRESS banner mandatory** for all conference-derived content vs. only major — TBD.
+- **`Auf einen Blick` rubric** — paused since NP1-25 p.33; revival TBD.
+- **Reader-engagement signals from medizinonline.com** — could feed back into `/kb-issue-plan` topic priority. Pipeline TBD.
 
 ---
 
 ## 20. Schema version
 
-- Spec version: **1.0** (2026-05-01)
-- Source: 18 issues NP1-23 → NP1-26 + 1 process docx (Themenplan NP3-26)
+- Spec version: **1.1** (2026-05-01)
+- Source: 18 issues NP1-23 → NP1-26 + 1 process docx (Themenplan NP3-26) + Mediadaten 2026
 - Reverse-engineering reports (audit trail): `docs/reverse-engineering/info-np/{structure,cme,pharma,voice}.md`
+- Editor decisions: §19 (all 9 originally-open items resolved 2026-05-01)
+- Mediadaten reference: [`MEDIADATEN-2026.md`](MEDIADATEN-2026.md)
+
+## 21. Issue planning methodology (how Themenpläne come together)
+
+Reverse-engineered from the NP3-26 Themenplan docx (16 specific topics) compared against the Mediadaten 2026 NP3-26 row (7 broad Themenschwerpunkte + Kongress AAN). The methodology forward-applies to NP4-26 and every subsequent issue.
+
+### 21.1 Inputs
+
+`/kb-issue-plan` starts with three input sources:
+
+1. **Mediadaten Themenschwerpunkte** for the target issue. Pre-committed broad indication areas, sold to advertisers as the basis for booking. NP3-26: ALS, Hirntumore, Neuropädiatrie, Depression, ADHS, Parkinson, Multiple Sklerose. Locked input.
+2. **Kongress anchor(s)** for the issue (Mediadaten "Themenschwerpunkte" column also lists congress acronyms): AAN for NP3-26; ESOC + EAN + AAIC for NP4-26; ECTRIMS for NP6-26 etc. Locked input.
+3. **Signal scan over the last 60–90 days** before Inserateschluss:
+   - Recent Swissmedic / EMA / FDA approvals in neurology + psychiatry
+   - Landmark trial readouts (NEJM, Lancet, JAMA, Lancet Neurology, JAMA Psychiatry)
+   - Guideline updates (AWMF S3, EAN, AAN, NICE, BAG)
+   - New drug classes / launches (e.g., Cobenfy / Muskarinerge, BTK-Inhibitoren)
+   - Hot pipeline news (positive Phase III readouts, REMS changes, label expansions)
+   - Reader-engagement signals from medizinonline.com (when wired)
+
+### 21.2 Mapping rules
+
+For each broad Mediadaten Themenschwerpunkt, **pick the most current specific subtopic** that the signal scan surfaces. This is what made the NP3-26 list specific:
+
+| Mediadaten broad area | NP3-26 specific topic | Driver |
+|---|---|---|
+| Multiple Sklerose | BTK-Inhibitoren in der MS — der erwartete Paradigmenwechsel | new drug class (Tolebrutinib readouts) |
+| Parkinson | Parkinson — neue Wirkmechanismen jenseits Levodopa | pipeline (subcutaneous L-Dopa, glia targets) |
+| ALS | ALS und SMA — Stand der Gen- und Antisense-Therapien 2026 | Tofersen long-term + Risdiplam |
+| Depression | Therapieresistente Depression — Esketamin und psychedelische Therapien | Esketamin Spezialitätenliste, MDMA pipeline |
+| ADHS | ADHS — neue Nicht-Stimulanzien | Viloxazin etc. |
+| Hirntumore | (covered in Medizin section, not promoted to CME) | — |
+| Neuropädiatrie | (covered in Medizin section, not promoted to CME) | — |
+
+**Add cross-cutting / signal-driven topics** beyond the Mediadaten list (these are the editor's value-add — currency, breadth, Swiss relevance):
+
+| NP3-26 added topic | Driver |
+|---|---|
+| Anti-Amyloid-Therapie der Alzheimer-Krankheit | post-Lecanemab/Donanemab field state |
+| Schlaganfall — Tenecteplase als neuer Standard | post-SHINE-2 consensus, Schweiz-relevant |
+| Migräne — CGRP-Langzeitdaten und Gepants | accumulating long-term data + Gepants |
+| Narkolepsie und Hypersomnien — Orexin-Renaissance | Orexin-2 agonist pipeline |
+| Aneurysmatische SAB — IV vs. SC Nimodipin | recent comparator data |
+| Milsaperidone (Bysanti) — neues Atypikum | drug launch |
+| Muskarinerge Antipsychotika — die neue Wirkstoffklasse | Cobenfy / Xanomelin-Trospium |
+| Rezidivprophylaxe in der Schizophrenie | LAI long-term real-world data |
+| GLP-1-Agonisten in der Psychiatrie | cross-cutting (Wegovy + psych comorbidities) |
+| Suchtmedizin — Buprenorphin und Benzodiazepin-Tapering | Praxismanagement-relevant |
+| Schizophrenie — Clozapin nach REMS-Aufhebung | FDA REMS removal news |
+
+### 21.3 Distribution across article types
+
+From the topic list, distribute to article types per the section budget (§2):
+
+- **2 CME articles**: pick the deepest, clinically actionable topics with longest reader half-life and clear sponsor-alignment opportunities. NP3-26 example: **BTK-Inhibitoren in der MS** + **Anti-Amyloid-Therapie der Alzheimer-Krankheit**.
+- **8–14 Medizin articles** (mix of `study`, `congress`, `review`): the next tier. Congress reports anchor to the Kongress(e). Hirntumore + Neuropädiatrie find homes here.
+- **2–4 News-Wissenschaft items**: newest signals (last-month Swissmedic announcement, fresh Phase III readout).
+- **2–4 Markt & Medizin items**: pharma press-release-derived; tied to issue's sponsors.
+- **0–3 Sonderreport / Publireportage**: customer-driven; depends on confirmed bookings 6–8 weeks before Inserateschluss.
+- **1–3 Praxismanagement**: e.g., Suchtmedizin (Buprenorphin/Benzo) is naturally Praxismanagement.
+
+### 21.4 Forward-applying to NP4-26 (worked example)
+
+Mediadaten 2026 NP4-26 row:
+- Inserateschluss: 13.08.2026 | Erscheinung: 28.08.2026
+- Kongresse: **ESOC, EAN, AAIC**
+- Themenschwerpunkte: **Demenz, SMA, Schizophrenie, Sucht, Trauma, Migräne, Schlafstörungen**
+- SPECIAL same window: **Demenz** (separate Sonderausgabe 18.09.2026)
+
+Applying §21.2 (illustrative — `/kb-issue-plan info-np NP4-26` produces this automatically using the signal scan as of August 2026):
+
+| Mediadaten broad area | Specific NP4-26 topic candidate |
+|---|---|
+| Demenz | Lecanemab / Donanemab — Schweizer Real-World-Daten 2026; Blut-Biomarker p-Tau217 in der Praxis |
+| SMA | Risdiplam Langzeit- und Onasemnogen-Abeparvovec Real-World-Daten |
+| Schizophrenie | Muskarinerge Antipsychotika — Cobenfy in der Praxis nach erstem Jahr |
+| Sucht | GLP-1-Agonisten in der Suchtmedizin — neue Evidenz |
+| Trauma | MDMA-assistierte Psychotherapie bei PTBS — der regulatorische Stand 2026 |
+| Migräne | Gepants vs. CGRP-mAbs — Therapie-Sequenzierung |
+| Schlafstörungen | Orexin-Antagonisten — Daridorexant Langzeit-Daten |
+
+Cross-cutting NP4-26 (illustrative):
+- AAIC 2026 Highlights (congress report)
+- EAN 2026 Highlights (congress report)
+- ESOC 2026 — neue Schlaganfall-Daten (congress report)
+- Anti-Tau-Therapie nach den ersten Phase-III-Lesungen (pipeline)
+- Schlafapnoe-Diagnostik in der Hausarztpraxis (Praxismanagement)
+
+CME picks (2): **Demenz — Diagnostik mit Blut-Biomarkern und Therapieentscheidungen 2026** + **Cobenfy bei Schizophrenie — Mechanismus, Evidenz, Praxis**. Both align with strong sponsor pools.
+
+### 21.5 Encoding in `/kb-issue-plan`
+
+The skill loads `MEDIADATEN-2026.md` (the issue row), runs the signal scan via the wiki + WebFetch (Swissmedic, EMA, FDA, AWMF, recent journal RSS), and produces the topic list with each topic tagged:
+- `mediadaten_anchor` (broad area or `null` for cross-cutting)
+- `signal_driver` (what surfaced this topic — approval/trial/guideline/launch/REMS)
+- `congress_anchor` (link to issue's Kongress(e))
+- `proposed_section` (cme | medizin-study | medizin-congress | medizin-review | praxismanagement | news-wissenschaft | markt-medizin | sonderreport)
+- `sponsor_candidates` (pharma companies whose products appear — drives sponsor-slot booking)
+
+The Chefredaktion reviews and locks topics; downstream skills draft articles per topic.

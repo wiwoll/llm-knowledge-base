@@ -11,13 +11,14 @@ Produce the Themenplan (issue plan) for a magazine issue, following the canonica
 
 ## Steps
 
-### 1. Read Config + Magazine Spec
+### 1. Read Config + Magazine Spec + Mediadaten
 
 Run in parallel:
 ```bash
 cat ~/.claude/kb-config.json
 cat ~/.claude/skills/SCHEMA.md
 cat ~/.claude/skills/magazines/MAGAZINES.md
+cat ~/.claude/skills/magazines/MEDIADATEN-2026.md
 ```
 
 Determine `MAGAZINE_SLUG` from the first positional argument (or `default_magazine` from config). Then read the magazine-specific spec:
@@ -28,9 +29,20 @@ cat ~/.claude/skills/magazines/MAGAZINE-{MAGAZINE_SLUG_UPPER}.md
 Extract from the spec:
 - Page architecture (default page count, section list, fixed vs. rotating sections)
 - Article-type taxonomy
-- Recurring sticky topics (§17 of the spec)
-- Pharma sponsor pool (§16)
-- Open issues that affect planning (§19)
+- Recurring sticky topics (spec §17)
+- Pharma sponsor pool (spec §16)
+- **Issue-planning methodology (spec §21)** — this is the master algorithm
+- Resolved decisions (spec §19)
+
+Extract from Mediadaten 2026:
+- The row for the requested `<issue-id>` (e.g., NP3-26): Inserateschluss, Erscheinungsdatum, Kongresse, **Themenschwerpunkte** (the broad indication areas committed to advertisers)
+- Auflage, Med. Herausgeber, Zielgruppe
+- Standard rate-card numbers in case sponsor-slot suggestions need pricing context
+
+If the issue-id is not in the Mediadaten table, refuse:
+```
+Error: <issue-id> not in Mediadaten 2026 publication plan. Available IDs: NP1-26 ... NP6-26 + SPECIAL Demenz / Depression & Angststörungen / Multiple Sklerose & ECTRIMS.
+```
 
 ### 2. Parse Arguments
 
@@ -92,12 +104,42 @@ Anzeigen (U2, U3, U4, mid-book)  ~6
 
 Adjust per spec for the chosen page count.
 
-### 7. Generate Topic List
+### 7. Generate Topic List (per spec §21 methodology)
 
-For each editorial section, propose specific topics. Distinguish:
-- **Locked** topics: directly continuing wiki concepts marked `editorial_status: published` or with strong recurrence; or topics already committed via prior issues' "Das Letzte" teasers
-- **Proposed** topics: candidates from wiki signals + congress + pipeline; flagged for editor approval
-- **Sponsor slots**: identify likely Sonderreport/Publireportage opportunities matching current sponsor activity
+The spec §21 defines the master algorithm. Apply it:
+
+**Step 7a — Mediadaten anchors**: take the broad Themenschwerpunkte for this issue from Mediadaten 2026. These are **locked** (committed to advertisers).
+
+**Step 7b — Mediadaten anchors → specific subtopics**: for each broad area, run the signal scan from Step 4 + 5 + wiki signals from Step 3 to identify the **single most current specific subtopic**. Example for NP3-26 Multiple Sklerose anchor → "BTK-Inhibitoren in der MS — der erwartete Paradigmenwechsel" (driver: Tolebrutinib readouts).
+
+**Step 7c — Cross-cutting / signal-driven topics** (the editor's value-add): add 5–10 topics outside the Mediadaten anchors based on:
+- Recent Swissmedic / EMA / FDA approvals
+- Landmark Phase III readouts (NEJM, Lancet, JAMA, Lancet Neurology, JAMA Psychiatry)
+- Guideline updates (AWMF, EAN, AAN, NICE)
+- New drug classes / launches
+- Cross-specialty bridges (e.g., GLP-1 in Psychiatry)
+- Regulatory changes affecting Swiss practice (REMS removals, label expansions)
+
+**Step 7d — Each topic gets tagged**:
+- `mediadaten_anchor` — the broad area, or `null` for cross-cutting
+- `signal_driver` — specific reason this topic is hot now (approval / trial / guideline / launch / REMS / etc.)
+- `congress_anchor` — the issue's Kongress(e) the topic ties to (or `null`)
+- `proposed_section` — `cme | medizin-study | medizin-congress | medizin-review | praxismanagement | news-wissenschaft | markt-medizin | sonderreport`
+- `sponsor_candidates` — pharma companies whose products appear in the topic (drives sponsor-slot booking; cross-reference with Tier-1/2/3 list in spec §16)
+
+**Step 7e — Distribution to article types** (per spec §21.3):
+- **2 CMEs**: pick the deepest, most clinically actionable, sponsor-alignable topics — typically one neurology + one psychiatry
+- **8–14 Medizin articles**: rest of the locked topics, plus congress reports
+- **2–4 News-Wissenschaft**: newest signals
+- **2–4 Markt & Medizin**: tied to confirmed sponsors with current press releases
+- **0–3 Sonderreport / Publireportage**: only confirmed bookings (status: `confirmed`); proposed slots use status: `proposed-pending-booking`
+- **1–3 Praxismanagement**: practice-management-relevant topics (Burnout, Suchtprävention, EFAS, etc.)
+
+**Status taxonomy per topic**:
+- `locked`: committed (directly continuing a published wiki article, or already announced via prior issue's Das Letzte teaser, or anchored to a Mediadaten Themenschwerpunkt)
+- `proposed`: candidate awaiting Chefredaktion approval
+- `confirmed-booking`: sponsor slot with signed booking
+- `proposed-pending-booking`: sponsor slot proposed to a candidate sponsor
 
 ### 8. Suggest Authors
 
