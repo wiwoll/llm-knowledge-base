@@ -19,6 +19,11 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`. The lint report and all rationales/suggestions are written in `DEFAULT_LANG`.
+
+**Additional language-aware check:** also collect `lang_inconsistencies` — concept articles whose `lang` frontmatter does not match `DEFAULT_LANG`, and source articles missing a `lang` field. These are reported but only flagged as warnings (not errors) since older content may predate the language policy.
+
 ### 2. Read the Index
 
 ```bash
@@ -34,6 +39,7 @@ missing_concepts: []
 broken_links: []
 duplicate_concepts: []
 new_suggestions: []
+lang_inconsistencies: []
 ```
 
 ---
@@ -142,37 +148,49 @@ Add all suggestions to `new_suggestions`:
 Set `REPORT_DATE` to today's date in `YYYY-MM-DD` format.
 Set `REPORT_FILE` = `outputs/{REPORT_DATE}-kb-lint-report.md`
 
-Write to `{KB_PATH}/{REPORT_FILE}`:
+Write to `{KB_PATH}/{REPORT_FILE}` (in `DEFAULT_LANG`):
 
 ```markdown
+---
+lang: {DEFAULT_LANG}
+type: lint-report
+generated_at: {current UTC ISO timestamp}
+---
+
 # KB Lint Report — {REPORT_DATE}
 
 ## Thin Articles
-{If none: "None found."}
+{If none: localized "None found."}
 {For each: "- [[{file without .md}]] — {N} sentences (needs expansion)"}
 
 ## Missing Concepts
-{If none: "None found."}
+{If none: localized "None found."}
 {For each: "- `[[concepts/{concept}]]` referenced in {sources} but no article exists"}
 
 ## Broken Wikilinks
-{If none: "None found."}
+{If none: localized "None found."}
 {For each: "- `[[{link}]]` in {found_in}"}
 
 ## Duplicate Concepts
-{If none: "None found."}
+{If none: localized "None found."}
 {For each: "- `{slug_a}` and `{slug_b}` may overlap ({reason}) — consider merging"}
 
+## Language Inconsistencies
+{If none: localized "None found."}
+{For each: "- {file} — lang: {actual} (expected {DEFAULT_LANG} for concept) / missing lang field"}
+
 ## New Article Suggestions
-{If none: "No suggestions."}
-{For each: "- **{concept}** — {reason}{if web_imputed: ' *(web-imputed)*'}"}
+{If none: localized "No suggestions."}
+{For each: "- **{concept}** — {reason in {DEFAULT_LANG}}{if web_imputed: ' *(web-imputed)*'}"}
 ```
+
+All headings, rationales, and "None found"/"No suggestions" placeholders are localized into `DEFAULT_LANG` (e.g., "Keine gefunden." / "Keine Vorschläge." for German).
 
 ---
 
 ### 9. Update Index
 
-Append to `## Outputs` in `{KB_PATH}/wiki/index.md`:
+Append to `## Antworten & Berichte / Outputs` (or `## Outputs` if older index format) in `{KB_PATH}/wiki/index.md`:
 
 ```
 - [[{REPORT_FILE without .md extension}]] — lint report: {N} issues found, {M} suggestions

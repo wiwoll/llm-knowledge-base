@@ -35,13 +35,13 @@ if [ ! -f "$INDEX" ]; then
   cat > "$INDEX" << 'EOF'
 # Knowledge Base Index
 
-## Concepts
+## Konzepte / Concepts
 
-## Sources
+## Quellen / Sources
 
-## Outputs
+## Antworten & Berichte / Outputs
 EOF
-  echo "Created wiki/index.md"
+  echo "Created wiki/index.md (bilingual headings DE/EN)"
 fi
 
 # Create .gitignore
@@ -54,14 +54,25 @@ EOF
 fi
 
 # Write config
+# Language defaults can be overridden via env vars: KB_DEFAULT_LANG, KB_SUPPORTED_LANGS (comma-separated)
+DEFAULT_LANG="${KB_DEFAULT_LANG:-de}"
+SUPPORTED_LANGS_CSV="${KB_SUPPORTED_LANGS:-de,en}"
+SUPPORTED_LANGS_JSON="$(printf '%s' "$SUPPORTED_LANGS_CSV" | awk -F, '{ for (i=1;i<=NF;i++) printf("%s\"%s\"", (i>1?",":""), $i) }')"
+
 CONFIG="$HOME/.claude/kb-config.json"
 mkdir -p "$HOME/.claude"
-cat > "$CONFIG" << EOF
+if [ -f "$CONFIG" ]; then
+  echo "Config already exists at $CONFIG — leaving it untouched (delete it manually to regenerate)."
+else
+  cat > "$CONFIG" << EOF
 {
-  "kb_path": "$KB_PATH"
+  "kb_path": "$KB_PATH",
+  "default_output_lang": "$DEFAULT_LANG",
+  "supported_langs": [$SUPPORTED_LANGS_JSON]
 }
 EOF
-echo "Wrote config to $CONFIG"
+  echo "Wrote config to $CONFIG (default_output_lang=$DEFAULT_LANG, supported_langs=$SUPPORTED_LANGS_CSV)"
+fi
 
 # Install skills
 SKILLS_DIR="$HOME/.claude/skills"

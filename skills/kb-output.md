@@ -19,6 +19,14 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
+**Language policy for output:**
+- If `SOURCE_TYPE` is `question`: detect the question's language as `OUTPUT_LANG`. Render slides/chart titles/labels in `OUTPUT_LANG`.
+- If `SOURCE_TYPE` is `file`: use the source file's `lang` frontmatter as `OUTPUT_LANG`. If missing, fall back to `DEFAULT_LANG`.
+- All slide content (titles, bullets, summary) is in `OUTPUT_LANG`. Chart titles and labels in `OUTPUT_LANG`.
+
 ### 2. Parse Arguments
 
 The invocation format is: `/kb-output --{format} {source}`
@@ -88,6 +96,7 @@ Write to `{KB_PATH}/outputs/{OUTPUT_DATE}-{slug}-slides.md`:
 marp: true
 theme: default
 paginate: true
+lang: {OUTPUT_LANG}
 ---
 
 # {TITLE}

@@ -20,6 +20,11 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
+**Detect the question's language** (`QUESTION_LANG`). If it matches one of `SUPPORTED_LANGS`, use it. If unsupported, fall back to `DEFAULT_LANG`. The answer must be written in `QUESTION_LANG` regardless of the languages of the source articles consulted.
+
 ### 2. Read the Index
 
 Run:
@@ -48,8 +53,9 @@ If reading an article reveals additional relevant concepts or sources (via its `
 
 ### 5. Synthesize Answer
 
-Write a clear, grounded answer to the question:
-- Cite specific wiki articles inline using `[[wiki-link]]` format (e.g. `[[concepts/attention-mechanism]]`)
+Write a clear, grounded answer to the question **in `QUESTION_LANG`**:
+- Cite specific wiki articles inline using `[[wiki-link]]` format (e.g. `[[concepts/attention-mechanism]]`). The wiki-link slug stays as-is regardless of answer language.
+- If a consulted source is in a different language than `QUESTION_LANG`, translate any quoted material into `QUESTION_LANG` and note the original language briefly (e.g. "Laut Vaswani et al. (en): ...").
 - If the wiki does not contain enough information to answer fully, say so explicitly — state what is known and what is missing. Do not fabricate.
 - Match length to complexity: 1 paragraph for simple questions, structured sections with headings for complex ones.
 
@@ -71,12 +77,13 @@ Write to `{KB_PATH}/{OUTPUT_FILE}`:
 ---
 question: {exact question asked}
 answered_at: {current UTC ISO timestamp}
+lang: {QUESTION_LANG}
 sources_consulted: [{comma-separated list of article paths read, e.g. "concepts/attention.md", "sources/vaswani-2017.md"}]
 ---
 
 # {Question}
 
-{Synthesized answer with [[wiki-link]] citations inline}
+{Synthesized answer in {QUESTION_LANG} with [[wiki-link]] citations inline}
 
 ## Sources Consulted
 {Bulleted list of all articles read, formatted as [[wiki-links]]}
@@ -84,10 +91,10 @@ sources_consulted: [{comma-separated list of article paths read, e.g. "concepts/
 
 ### 8. Update Index
 
-Append to the `## Outputs` section of `{KB_PATH}/wiki/index.md`:
+Append to the `## Antworten & Berichte / Outputs` section of `{KB_PATH}/wiki/index.md` (or the matching `## Outputs` heading if older index format):
 
 ```
-- [[{OUTPUT_FILE without .md extension}]] — {one-line summary: the question asked and the core answer in one sentence}
+- [[{OUTPUT_FILE without .md extension}]] — {one-line summary in {DEFAULT_LANG}: the question asked and the core answer in one sentence; mark with "(en)" or similar if QUESTION_LANG differs from DEFAULT_LANG}
 ```
 
 Write the updated index back to disk.

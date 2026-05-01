@@ -19,6 +19,14 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
+**Language policy for merge:**
+- If both articles have the same `lang`, the merged article keeps that `lang`.
+- If they differ, the merged article is written in `DEFAULT_LANG`. Translate the foreign-language content into `DEFAULT_LANG` while merging — do not produce mixed-language paragraphs.
+- The `lang:` field is always set in the merged article's frontmatter.
+
 ### 2. Determine Mode
 
 **Explicit mode:** If two slugs are provided after `/kb-merge` (e.g. `/kb-merge attention attention-mechanism`):
@@ -70,17 +78,20 @@ If not already determined in Step 2, compare `## Sources` section length:
 
 Write a clean merged article to `{KB_PATH}/wiki/concepts/{slug-keep}.md`:
 
+Determine `MERGED_LANG`: if both articles have the same `lang`, use it; otherwise use `DEFAULT_LANG`.
+
 ```markdown
 ---
+lang: {MERGED_LANG}
 tags: [{union of both articles' tags, deduplicated}]
 ---
 
-# {Title: use slug-keep's title, or synthesize a better one if the merge warrants it}
+# {Title in {MERGED_LANG}: use slug-keep's title, or synthesize a better one if the merge warrants it}
 
-{Synthesized body: write a single coherent article that incorporates all substantive content
+{Synthesized body in {MERGED_LANG}: write a single coherent article that incorporates all substantive content
 from both articles. Do not include seams like "In the first article..." or "Additionally...".
 Write as if it was always one article. Resolve any contradictions explicitly.
-Length: match the combined depth of both articles.}
+Length: match the combined depth of both articles. If one source article is in a different language than MERGED_LANG, translate its content while merging — no mixed-language paragraphs.}
 
 ## Connected Concepts
 {Union of both articles' Connected Concepts / See Also sections, deduplicated,

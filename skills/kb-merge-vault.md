@@ -19,6 +19,14 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` (primary vault) for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
+**Language policy for vault merging:**
+- When concept articles conflict between vaults: if both have the same `lang`, the merged article keeps that `lang`. If they differ, the merged article is written in `DEFAULT_LANG` (translate the foreign-language content during the merge).
+- When source summaries conflict: keep the source's own language; merge content within that language.
+- Source articles missing a `lang` field after the merge are flagged for the next `/kb-lint` run.
+
 ### 2. Validate Source Vault
 
 The argument after `/kb-merge-vault` is the secondary vault path. Expand `~` if present.
@@ -105,9 +113,11 @@ For each `.md` file in `{SOURCE_PATH}/wiki/concepts/`:
    - Increment `copied`
 3. If it **does** exist:
    - Read both concept articles
+   - Determine `MERGED_LANG`: same `lang` in both → keep it; otherwise → `DEFAULT_LANG`
    - Write a clean merged article to `{KB_PATH}/wiki/concepts/{SLUG}.md`:
+     - **lang**: `MERGED_LANG`
      - **Tags**: union of both tag lists, deduplicated
-     - **Body**: synthesize both bodies into one coherent article — no seams, no duplication, resolve any contradictions explicitly
+     - **Body**: synthesize both bodies into one coherent article in `MERGED_LANG` — no seams, no duplication, resolve any contradictions explicitly. If one article is in a different language, translate it into `MERGED_LANG` while merging.
      - **Connected Concepts**: union of both lists, deduplicated
      - **Sources**: union of both `## Sources` sections, deduplicated
    - Increment `merged`

@@ -19,6 +19,11 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
+**Language policy for import:** detect each note's language and store as `lang` in the frontmatter. Notes routed to `wiki/concepts/` keep their original language and `lang` value (the team can manually retranslate later via `/kb-merge` if they want consistency with `DEFAULT_LANG`). Notes routed to `raw/notes/` also store the detected `lang` so `/kb-compile` can use it.
+
 ### 2. Validate Source Vault
 
 The argument after `/kb-import` is the source vault path. Expand `~` if present.
@@ -91,17 +96,19 @@ When in doubt between the two, route to `raw/notes/` — it will be compiled lat
    - If yes: skip this file, log as `skipped (concept already exists): {SLUG}`
 3. Write to `{KB_PATH}/wiki/concepts/{SLUG}.md`:
    - Preserve all existing content exactly
+   - Detect the note's language as `NOTE_LANG` (one of `SUPPORTED_LANGS`, fall back to `DEFAULT_LANG`)
    - If YAML frontmatter is missing, prepend:
      ```yaml
      ---
+     lang: {NOTE_LANG}
      tags: [{infer 2-4 relevant tags from content}]
      imported_from: {original filename}
      ---
      ```
-   - If frontmatter exists, add `imported_from: {original filename}` to it
-4. Append to `wiki/index.md` under `## Concepts` (only if not already present):
+   - If frontmatter exists, add `lang: {NOTE_LANG}` (if missing) and `imported_from: {original filename}` to it
+4. Append to `wiki/index.md` under `## Konzepte / Concepts` (or `## Concepts` for older index format), only if not already present:
    ```
-   - [[concepts/{SLUG}]] — {one-line description inferred from content}
+   - [[concepts/{SLUG}]] — {one-line description in {DEFAULT_LANG} inferred from content; if NOTE_LANG ≠ DEFAULT_LANG, append "({NOTE_LANG})"}
    ```
 
 ---
@@ -111,12 +118,14 @@ When in doubt between the two, route to `raw/notes/` — it will be compiled lat
 1. Generate `SLUG` from the filename: lowercase, replace spaces with `-`, strip special characters.
 2. If `{KB_PATH}/raw/notes/{SLUG}.md` already exists, append `-imported` to the slug.
 3. Write to `{KB_PATH}/raw/notes/{SLUG}.md`:
+   - Detect language as `NOTE_LANG` (one of `SUPPORTED_LANGS`, fall back to `DEFAULT_LANG`)
    - Prepend YAML frontmatter:
      ```yaml
      ---
      source: imported from {original file path}
      ingested_at: {current UTC ISO timestamp}
      type: note
+     lang: {NOTE_LANG}
      status: uncompiled
      imported_from: {original filename}
      ---
@@ -128,7 +137,8 @@ When in doubt between the two, route to `raw/notes/` — it will be compiled lat
      "status": "uncompiled",
      "ingested_at": "{current UTC ISO timestamp}",
      "source": "imported from {original file path}",
-     "type": "note"
+     "type": "note",
+     "lang": "{NOTE_LANG}"
    }
    ```
 

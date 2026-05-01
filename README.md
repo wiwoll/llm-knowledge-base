@@ -67,6 +67,37 @@ The wiki grows smarter with every compile cycle. Q&A answers compound on each ot
 
 ---
 
+## Multilingual Support
+
+This fork is configured for **bilingual editorial workflows (DE/EN)** at Prime Public Media AG. All skills handle a `lang` field per article and respect a `default_output_lang` configured in `~/.claude/kb-config.json`.
+
+| Surface | Language behavior |
+|---|---|
+| Skill instructions | English (Claude reads these — kept stable) |
+| Source summaries (`wiki/sources/`) | Source's own language — preserved in `lang:` frontmatter |
+| Concept articles (`wiki/concepts/`) | `default_output_lang` (DE for PPM) — translated/synthesized from foreign sources |
+| Q&A answers (`outputs/`) | Match the question's language |
+| Reflect / Lint reports | `default_output_lang` |
+| Slides / Charts | Language of the source question or the source file's `lang` |
+
+**Configuration** in `~/.claude/kb-config.json`:
+```json
+{
+  "kb_path": "/Users/.../redaktions-wiki",
+  "default_output_lang": "de",
+  "supported_langs": ["de", "en"]
+}
+```
+
+To add additional languages later (e.g. French/Italian for Swiss markets), append them to `supported_langs` — the skills will detect and route content automatically.
+
+Override at install time:
+```bash
+KB_DEFAULT_LANG=de KB_SUPPORTED_LANGS=de,en,fr,it bash setup.sh ~/redaktions-wiki
+```
+
+---
+
 ## Prerequisites
 
 | Requirement | Notes |

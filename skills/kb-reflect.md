@@ -19,6 +19,11 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path.
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"`) and `supported_langs` (default `["de","en"]`).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
+**Language policy for reflection:** synthesis articles and the reflection report are written in `DEFAULT_LANG`. When citing or summarizing source articles in other languages, translate excerpts into `DEFAULT_LANG`.
+
 ### 2. Read Reflect State
 
 ```bash
@@ -109,15 +114,16 @@ For candidates with strong evidence, write to `{KB_PATH}/wiki/concepts/{proposed
 
 ```markdown
 ---
+lang: {DEFAULT_LANG}
 tags: [{tags from connected concepts, plus "synthesis"}]
 type: synthesis
 created_by: kb-reflect
 created_at: {current UTC ISO timestamp}
 ---
 
-# {proposed_title}
+# {proposed_title in {DEFAULT_LANG}}
 
-{3–5 paragraph synthesis. Explain the connection, relationship, contradiction, or gap clearly.
+{3–5 paragraph synthesis in {DEFAULT_LANG}. Explain the connection, relationship, contradiction, or gap clearly.
 For connections: what do these concepts share, and why does it matter?
 For contradictions: what are the opposing positions, what might explain the disagreement?
 For gaps: what is the missing concept, and what would an article about it cover?
@@ -148,18 +154,24 @@ Read the article. If it doesn't already have a `## Connected Concepts` or `## Se
 Set `REPORT_DATE` to today's date in `YYYY-MM-DD` format.
 Set `REPORT_FILE` = `outputs/{REPORT_DATE}-kb-reflect-report.md`
 
-Write to `{KB_PATH}/{REPORT_FILE}`:
+Write to `{KB_PATH}/{REPORT_FILE}` (in `DEFAULT_LANG`):
 
 ```markdown
+---
+lang: {DEFAULT_LANG}
+type: reflect-report
+generated_at: {current UTC ISO timestamp}
+---
+
 # KB Reflect Report — {REPORT_DATE}
 
 ## Synthesis Articles Created
 {For each article written:}
-- [[concepts/{slug}]] — {one-line description of the connection found}
+- [[concepts/{slug}]] — {one-line description in {DEFAULT_LANG} of the connection found}
 
 ## Connections Found But Not Written
 {For each weak-evidence candidate:}
-- {hypothesis} — insufficient evidence (articles consulted: {list})
+- {hypothesis in {DEFAULT_LANG}} — insufficient evidence (articles consulted: {list})
 
 ## Suggested Follow-up Ingestion
 {Any concepts or topics referenced in synthesis articles that have no source in the wiki yet.
@@ -174,12 +186,12 @@ And stop without writing a report.
 
 ### 10. Update wiki/index.md
 
-For each synthesis article created, append under `## Concepts`:
+For each synthesis article created, append under `## Konzepte / Concepts` (or `## Concepts` if older index format):
 ```
-- [[concepts/{slug}]] — {one-line description} *(synthesis)*
+- [[concepts/{slug}]] — {one-line description in {DEFAULT_LANG}} *(synthesis)*
 ```
 
-Append the report under `## Outputs`:
+Append the report under `## Antworten & Berichte / Outputs` (or `## Outputs` if older index format):
 ```
 - [[{REPORT_FILE without .md}]] — reflect report: {N} synthesis articles created
 ```

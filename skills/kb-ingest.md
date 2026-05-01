@@ -20,6 +20,9 @@ cat ~/.claude/kb-config.json
 Extract `kb_path`. Expand `~` to the actual home directory path (run `echo ~` if needed).
 Set this as `KB_PATH` for all subsequent steps.
 
+Also extract `default_output_lang` (default `"de"` if missing) and `supported_langs` (default `["de","en"]` if missing).
+Set these as `DEFAULT_LANG` and `SUPPORTED_LANGS`.
+
 ### 2. Read Manifest
 
 Run:
@@ -44,6 +47,8 @@ The argument passed after `/kb-ingest` is the source. Classify it:
 
 Record the current UTC time in ISO 8601 format (e.g. `2026-04-05T10:00:00Z`) as `INGESTED_AT`.
 
+**Language detection:** After fetching/reading the content (sub-steps below), detect the source language. Set `LANG` to the ISO 639-1 code that matches one of `SUPPORTED_LANGS` (e.g. `de`, `en`). If detection is ambiguous or the language is not in `SUPPORTED_LANGS`, fall back to `DEFAULT_LANG`. For plain notes without enough text to detect, use `DEFAULT_LANG`.
+
 ---
 
 #### Web
@@ -62,6 +67,7 @@ Record the current UTC time in ISO 8601 format (e.g. `2026-04-05T10:00:00Z`) as 
 source: {full URL}
 ingested_at: {INGESTED_AT}
 type: web
+lang: {LANG}
 status: uncompiled
 ---
 
@@ -84,6 +90,7 @@ Set `RAW_KEY` = `raw/web/{slug}.md`
 source: {original file path}
 ingested_at: {INGESTED_AT}
 type: pdf
+lang: {LANG}
 status: uncompiled
 ---
 
@@ -112,12 +119,15 @@ Set `RAW_KEY` = `raw/pdfs/{slug}.md`
 source: {original file path}
 ingested_at: {INGESTED_AT}
 type: image
+lang: {LANG}
 status: uncompiled
 image_file: {slug}.{ext}
 ---
 
-{detailed description}
+{detailed description in {LANG}}
 ```
+
+The image description should be written in `LANG` if detectable from text within the image; otherwise in `DEFAULT_LANG`.
 
 6. Copy the image:
 ```bash
@@ -141,6 +151,7 @@ Set `RAW_KEY` = `raw/images/{slug}.md`
 source: manual
 ingested_at: {INGESTED_AT}
 type: note
+lang: {LANG}
 status: uncompiled
 ---
 
@@ -160,7 +171,8 @@ Add an entry to the manifest JSON (or update if the key already exists):
   "status": "uncompiled",
   "ingested_at": "{INGESTED_AT}",
   "source": "{source url or path}",
-  "type": "{web|pdf|image|note}"
+  "type": "{web|pdf|image|note}",
+  "lang": "{LANG}"
 }
 ```
 
